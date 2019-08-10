@@ -1,0 +1,254 @@
+/* [wxMaxima batch file version 1] [ DO NOT EDIT BY HAND! ]*/
+/* [ Created with wxMaxima version 18.10.1 ] */
+/* [wxMaxima: input   start ] */
+load("pdynamics.mac");
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+normq(q1,p1,q2,p2):=(q1^2+q2^2)/2$
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+normp(q1,p1,q2,p2):=(p1^2+p2^2)/2$
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+prodqp(q1,p1,q2,p2):=q1*p1+q2*p2$
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+pbracket(normp,normq);
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+pbracket(prodqp,normq);
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+pbracket(prodqp,normp);
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+V(x,y,z):=U(sqrt(x^2+y^2+z^2))$
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+gradef(U(r),U\’(r))$
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+diff(V(x,y,z),x);
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+Hcentral(x,px,y,py,z,pz):=(px^2+py^2+pz^2)/2 + V(x,y,z)$
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+L[z](x,px,y,py,z,pz):=x*py-y*px$
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+pbracket(Hcentral,L[z]);
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+K(q,p):=p^2/2+m*g*q$
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+pcanonical_eqs(K);
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+pcanonical_sol(K);
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+assume(%omega > 0);
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+Hosc(x,y):=y^2/2+%omega^2*x^2/2;
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+pcanonical_eqs(Hosc);
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+pcanonical_sol(Hosc);
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+foo(a,b):=a$
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+pevolution(foo,Hosc);
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+pintcurv([a*x-b,a*y],[x,y]);
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+pvectflow([y,-%omega^2*x],[x,y]);
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+phamvect(Hosc);
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+phamflow(Hosc);
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+goo(x,y):=-x^2*(1+y)/2$
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+paverage(goo,[y,-x],[x,y]);
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+Hosc0(q1,p1):=(q1^2+p1^2)/2$
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+phamaverage(goo,Hosc0);
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+psprojector(goo,[y,-x],[x,y]);
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+K0(q1,p1,q2,p2):=(p1^2+p2^2)/2+(q1^2+q2^2)/2;
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+K1(q1,p1,q2,p2):=q1^3/3-q1*q2^2;
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+K2(q1,p1,q2,p2):=0;
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+u(q1,p1,q2,p2):=1$
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+pnormal2(K0,K1,K2,%epsilon,u);
+/* [wxMaxima: input   end   ] */
+/* [wxMaxima: answer  start ] */
+p;
+/* [wxMaxima: answer  end   ] */
+/* [wxMaxima: answer  start ] */
+p;
+/* [wxMaxima: answer  end   ] */
+/* [wxMaxima: answer  start ] */
+p;
+/* [wxMaxima: answer  end   ] */
+
+
+/* [wxMaxima: input   start ] */
+phopf2(coeff(%,%epsilon,0));
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+phopf4(coeff(%th(2),%epsilon^2));
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+subst(%r1=0,%);
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+H0(q1,p1,q2,p2):=(p1^2+p2^2)/2+(q1^2+q2^2)/2;
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+H1(q1,p1,q2,p2):=-q1^2*(1+q2)/2;
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+H2(q1,p1,q2,p2):=0;
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+pnormal2(H0,H1,H2,%epsilon);
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+phopf2(coeff(%,%epsilon,0));
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+phopf2(coeff(%th(2),%epsilon,1));
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+phopf4(coeff(%th(3),%epsilon,2)+12*(q1^2+p1^2)/192);
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+subst(%r2=0,%);
+/* [wxMaxima: input   end   ] */
+
+
+/* [wxMaxima: input   start ] */
+phopf2(12*(q1^2+p1^2)/192);
+/* [wxMaxima: input   end   ] */
+
+
+
+/* Old versions of Maxima abort on loading files that end in a comment. */
+"Created with wxMaxima 18.10.1"$
