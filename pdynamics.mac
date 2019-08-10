@@ -1,0 +1,232 @@
+/* 
+ Copyright 2012 by Jose A. Vallejo
+ Facultad de Ciencias UASLP (Mexico)
+ This is free software; you can redistribute it and/or
+ modify it under the terms of the GNU General Public License,
+ http://www.gnu.org/copyleft/gpl.html.
+
+ This software has NO WARRANTY, not even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+*/
+
+pbracket(f,g):=block([n,Q,P,vars],
+n:length(args(lhs(apply(fundef,[f]))))/2,
+Q:makelist(concat(q,j),j,1,n),
+P:makelist(concat(p,j),j,1,n),
+vars:join(Q,P),
+expand(lsum(
+-diff(apply(f,vars),Q[i])*diff(apply(g,vars),P[i])
++diff(apply(f,vars),P[i])*diff(apply(g,vars),Q[i]),
+i,makelist(j,j,1,n)))
+)$
+
+pcanonical_eqs(H):=block(
+[n,P,Q,vars,h,eqq,eqp,eqs],
+n:length(args(lhs(apply(fundef,[H]))))/2,
+for j:1 thru n do q[j]:=concat(q,j),
+for j:1 thru n do p[j]:=concat(p,j),
+Q:makelist(q[j](t),j,1,n),
+P:makelist(p[k](t),k,1,n),
+vars:join(Q,P),
+h:lambda([u],apply(H,u))(vars),
+for j:1 thru n do 
+    (
+     eqq[j]:'diff(q[j](t),t)=diff(h,p[j](t)),
+     eqp[j]:'diff(p[j](t),t)=-diff(h,q[j](t))
+    ),
+eqs:append(makelist(eqq[j],j,1,n),makelist(eqp[j],j,1,n))
+)$
+
+pcanonical_sol(H):=block(
+[n,P,Q,vars,h,eqq,eqp,eqs,fns],
+n:length(args(lhs(apply(fundef,[H]))))/2,
+for j:1 thru n do q[j]:=concat(q,j),
+for j:1 thru n do p[j]:=concat(p,j),
+Q:makelist(q[j](t),j,1,n),
+P:makelist(p[k](t),k,1,n),
+vars:join(Q,P),
+h:lambda([u],apply(H,u))(vars),
+for j:1 thru n do 
+    (
+     eqq[j]:'diff(q[j](t),t)=diff(h,p[j](t)),
+     eqp[j]:'diff(p[j](t),t)=-diff(h,q[j](t))
+    ),
+eqs:append(makelist(eqq[j],j,1,n),makelist(eqp[j],j,1,n)),
+fns:append(makelist(q[j](t),j,1,n),makelist(p[j](t),j,1,n)),
+desolve(eqs,fns)
+)$
+
+pevolution(f,H):=block(
+[n,motions,Q,P,vars,f_aux,initial,sub],local(F),
+n:length(args(lhs(apply(fundef,[H]))))/2,
+motions:pcanonical_sol(H),
+Q:makelist(rhs(motions[k]),k,1,n),
+P:makelist(rhs(motions[k+n]),k,1,n),
+vars:join(Q,P),
+initial:makelist(subst(t=0,vars[j]),j,1,2*n),
+f_aux:lambda([u],apply(f,u)),
+atvalue(F(t),t=0,f_aux(initial)),
+sub:append(
+makelist(q[i]=Q[i],i,1,n),makelist(p[i]=P[i],i,1,n)
+),
+desolve('diff(F(t),t)=subst(sub,pbracket(H,f)),F(t))
+)$
+
+pintcurv(LL,ll):=block([m,laux,V,eqs],local(f,F,eq),
+m:length(LL),
+for j:1 thru m do define(funmake(f[j],ll),LL[j]),
+laux:makelist(f[j],j,1,m),
+V:makelist(ll[j](t),j,1,m),
+for j:1 thru m do F[j](t):=apply(f[j],V),
+for j:1 thru m do eq[j]:'diff(ll[j](t),t)=F[j](t),
+eqs:makelist(eq[j],j,1,m),
+desolve(eqs,V)
+)$
+
+pvectflow(LL,ll):=block(
+[m,laux,V,eqs],local(f,F,eq),
+m:length(LL),
+for j:1 thru m do define(funmake(f[j],ll),LL[j]),
+laux:makelist(f[j],j,1,m),
+V:makelist(ll[j](t),j,1,m),
+for j:1 thru m do F[j](t):=apply(f[j],V),
+for j:1 thru m do eq[j]:'diff(ll[j](t),t)=F[j](t),
+eqs:makelist(eq[j],j,1,m),
+for j:1 thru m do atvalue(ll[j](t),t=0,ll[j]),
+map(rhs,desolve(eqs,V))
+)$
+
+phamvect(H):=block([n,P,Q,vars,h,Xq,Xp],
+n:length(args(lhs(apply(fundef,[H]))))/2,
+Q:makelist(concat(q,j),j,1,n),
+P:makelist(concat(p,k),k,1,n),
+vars:join(Q,P),
+h:lambda([u],apply(H,u))(vars),
+Xq:create_list(diff(h,P[j]),j,1,n),
+Xp:create_list(-diff(h,Q[j]),j,1,n),
+join(Xq,Xp)
+)$
+
+phamflow(H):=block([n,P,Q,vars],
+n:length(args(lhs(apply(fundef,[H]))))/2,
+Q:makelist(concat(q,j),j,1,n),
+P:makelist(concat(p,k),k,1,n),
+vars:join(Q,P),
+pvectflow(phamvect(H),vars)
+)$
+
+paverage(g,LL,ll,[w]):=block([expr],
+expr:apply(g,pvectflow(LL,ll)),
+if w=[] then
+ratsimp((1/(2*%pi))*integrate(expr,t,0,2*%pi))
+else
+ratsimp((apply(first(w),vars)/(2*%pi))*integrate(expr,t,0,2*%pi/apply(first(w),vars)))
+)$
+
+phamaverage(g,H,[w]):=block([n,P,Q,vars],
+n:length(args(lhs(apply(fundef,[H]))))/2,
+Q:makelist(concat(q,j),j,1,n),
+P:makelist(concat(p,k),k,1,n),
+vars:join(Q,P),
+if w=[] then
+paverage(g,phamvect(H),vars)
+else
+paverage(g,phamvect(H),vars,first(w))
+)$
+
+psprojector(g,LL,ll,[w]):=block([expr],
+expr:apply(g,pvectflow(LL,ll)),
+if w=[] then
+ratsimp((1/(2*%pi))*integrate((t-%pi)*expr,t,0,2*%pi))
+else
+ratsimp((apply(first(w),vars)/(2*%pi))*integrate((t-%pi/apply(first(w),vars))*expr,t,0,2*%pi/apply(first(w),vars)))
+)$
+
+
+pnormal2(H0,H1,H2,eps,[w]):=block(
+[n,Q,P,vars,expr1,expr2,aux],local(foo,sh1,sh1w,pbsh1,pbsh1w),
+n:length(args(lhs(apply(fundef,[H0]))))/2,
+Q:makelist(concat(q,j),j,1,n),
+P:makelist(concat(p,k),k,1,n),
+vars:join(Q,P),
+if w=[] then
+    (
+     expr1:expand((1/(2*%pi))*integrate((t-%pi)*apply(H1,phamflow(H0)),t,0,2*%pi)),
+     define(funmake(sh1,vars),expr1),
+     aux:pbracket(sh1,H1),
+     define(funmake(pbsh1,vars),aux),
+     apply(H0,vars)+eps*phamaverage(H1,H0)
+     +((eps^2)/2)*(phamaverage(H2,H0)+phamaverage(pbsh1,H0))
+     )
+else
+    (
+     define(funmake(foo,vars),apply(H1,vars)/apply(first(w),vars)),
+     expr2:expand((apply(first(w),vars)/(2*%pi))*integrate((t-%pi/apply(first(w),vars))*apply(foo,phamflow(H0)),t,0,2*%pi/apply(first(w),vars))),
+     define(funmake(sh1w,vars),expr2),
+     aux:pbracket(sh1w,H1),
+     define(funmake(pbsh1w,vars),aux),
+     apply(H0,vars)+eps*phamaverage(H1,H0,first(w))
+     +((eps^2)/2)*(phamaverage(H2,H0,first(w))+phamaverage(pbsh1w,H0,first(w)))
+    )
+)$
+
+(
+load(coeflist)
+)$
+
+phopf2(expr):=block(
+[aux,list_coeff,eq,eqs,wp,a,l,ll,
+w:[2*(q1*q2+p1*p2),2*(q1*p2-q2*p1),q1^2+p1^2-q2^2-p2^2,q1^2+q2^2+p1^2+p2^2]],
+ll:length(w),
+wp:create_list('w[i],i,1,ll),
+a:makelist(a[k],k,1,ll),
+aux:facsum(expandwrt(expr-sum(a[i]*w[i],i,1,ll),q1,p1,q2,p2),q1,p1,q2,p2),
+list_coeff:coeffs(aux,q1,p1,q2,p2),
+l:length(list_coeff),
+for j:2 thru l do (k:j-1, eq[k]:first(list_coeff[j])),
+eqs:makelist(eq[k],k,1,l-1),
+subst(first(algsys(eqs,a)),sum(a[i]*wp[i],i,1,ll))
+)$
+
+phopf4(expr):=block(
+[aux,list_coeff,eq,eqs,W,Wp,a,l,
+w:[2*(q1*q2+p1*p2),2*(q1*p2-q2*p1),q1^2+p1^2-q2^2-p2^2,q1^2+q2^2+p1^2+p2^2]],
+W:create_list(w[i]*w[j],i,makelist(k,k,1,length(w)),j,makelist(k,k,i,length(w))),
+Wp:create_list('w[i]*'w[j],i,makelist(k,k,1,length(w)),j,makelist(k,k,i,length(w))),
+a:makelist(a[k],k,1,length(W)),
+aux:facsum(expandwrt(expr-sum(a[i]*W[i],i,1,length(W)),q1,p1,q2,p2),q1,p1,q2,p2),
+list_coeff:coeffs(aux,q1,p1,q2,p2),
+l:length(list_coeff),
+for j:2 thru l do (k:j-1, eq[k]:first(list_coeff[j])),
+eqs:makelist(eq[k],k,1,l-1),
+subst(first(algsys(eqs,a)),sum(a[i]*Wp[i],i,1,length(Wp)))
+)$
+
+phopf6(expr):=block(
+[aux,list_coeff,eq,eqs,W,Wp,U,Up,a,l,
+w:[q1^2+p1^2,4*q2^2+p2^2],
+u:[-4*p1*q1*q2-p2*q1^2+p1^2*p2,-2*q1^2*q2+2*p1^2*q2+2*p1*p2*q1]],
+W:makelist(w[1]^i*w[2]^(3-i),i,makelist(j,j,0,3)),
+Wp:makelist(%rho[1]^i*%rho[2]^(3-i),i,makelist(j,j,0,3)),
+U:makelist(u[1]^i*u[2]^(2-i),i,makelist(j,j,0,2)),
+Up:makelist(%rho[3]^i*%rho[4]^(2-i),i,makelist(j,j,0,2)),
+a:makelist(a[k],k,1,length(W)+length(U)),
+aux:facsum(expandwrt(expr-sum(a[i]*W[i],i,1,length(W))-sum(a[i+length(W)]*U[i],i,1,length(U)),q1,p1,q2,p2),q1,p1,q2,p2),
+list_coeff:coeffs(aux,q1,p1,q2,p2),
+l:length(list_coeff),
+for j:2 thru l do (k:j-1, eq[k]:first(list_coeff[j])),
+eqs:makelist(eq[k],k,1,l-1),
+subst(first(algsys(eqs,a)),sum(a[i]*Wp[i],i,1,length(Wp))+sum(a[i+length(W)]*Up[i],i,1,length(U)))
+)$
+
+
+
+
+
+
+
+
+
+
+
+
