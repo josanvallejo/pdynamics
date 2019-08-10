@@ -9,7 +9,7 @@ relative to the periodic flow of the unperturbed Hamiltonian H<sub>0</sub>.
 The formalism presented here is global, it does
 not require recursive computations and allows an efficient symbolic implementation.
 
-To use the package, simply unpack it and copy the file `pdynamics.mac` in the
+To use the package, simply copy the file `pdynamics.mac` in the
 `contrib` directory of your Maxima installation (in a Unix box
 this directory will be something as `/usr/share/maxima/5.42.0/share/contrib`,
  depending on the version number, and you will need root permissions for that,
